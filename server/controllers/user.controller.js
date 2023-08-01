@@ -1,21 +1,21 @@
 import jwt from "jsonwebtoken";
-import User from "../models/user.model";
+import User from "../models/user.model.js";
 
 export const userRegister = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    const checkUser = await User.find({ username });
+    const checkUser = await User.findOne({ username });
 
     if(checkUser){
       return res.status(400).json({
-        message: "username already exists"
+        message: "User Alreay Exists."
       });
     } 
     
     const user = new User({ username });
 
-    user.savePassword(password);
+    user.setPassword(password);
 
     await user.save();
 
@@ -33,11 +33,11 @@ export const userSignIn = async (req, res) => {
     const user = await User.findOne({ username }).select("username password salt id");
 
     if(!user) return res.status(400).json({
-      message: "User not found!"
+      message: "User Not Found!"
     });
 
     if(!user.validPassword(password)) return res.status(400).json({
-      message: "Wrong password!"
+      message: "Password wrong."
     });
 
     const token = jwt.sign(
